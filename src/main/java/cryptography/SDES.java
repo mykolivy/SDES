@@ -1,5 +1,9 @@
 package cryptography;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.nio.charset.CharsetDecoder;
+
 public class SDES {
     private final int KEY_LENGTH = 10;
     private final static int[][] S0 = new int[][] {
@@ -16,46 +20,38 @@ public class SDES {
         {2,1,0,3}
     };
 
-    public static String encrypt(String msg, int key){
-        return new String(encrypt(msg.getBytes(), key));
-    }
-
-    public static String decrypt(String msg, int key){
-        return new String(decrypt(msg.getBytes(), key));
-    }
-
     public static byte[] encrypt(byte[] msg, int key){
         int[] keys = getKeys(key);
-        StringBuilder result = new StringBuilder(msg.length);
-        for (byte c: msg)
-            result.append(encrypt(c, keys));
+        byte[] result = new byte[msg.length];
+        for (int i = 0; i < result.length; i++)
+            result[i] = encrypt(msg[i], keys);
 
-        return result.toString().getBytes();
+        return result;
     }
 
     public static byte[] decrypt(byte[] msg, int key){
         int[] keys = getKeys(key);
-        StringBuilder result = new StringBuilder(msg.length);
-        for (byte c: msg)
-            result.append(decrypt(c, keys));
+        byte[] result = new byte[msg.length];
+        for (int i = 0; i < result.length; i++)
+            result[i] = decrypt(msg[i], keys);
 
-        return result.toString().getBytes();
+        return result;
     }
 
     static byte encrypt(byte c, int[] keys)
     {
         int result = f(IP(c), keys[0]);
-        result = (result << 28) >>> 24 | (result >> 4);
+        result = (result << 28) >>> 24 | (result >>> 4);
         result = f(result, keys[1]);
         return (byte) inverseIP(result);
     }
 
     static byte decrypt(byte c, int[] keys)
     {
-        int temp = keys[0];
-        keys[0] = keys[1];
-        keys[1] = temp;
-        return encrypt(c, keys);
+        int[] newKeys = new int[2];
+        newKeys[0] = keys[1];
+        newKeys[1] = keys[0];
+        return encrypt(c, newKeys);
     }
 
     static int f(int plainText, int subKey){
@@ -109,11 +105,11 @@ public class SDES {
         permutation ^= subKey;
 
         int substituted = 0;
-        int i = ((permutation & (1 << 7)) >> 6) | (permutation & (1 << 4)) >> 4;
-        int j = ((permutation & (1 << 6)) >> 5) | (permutation & (1 << 5)) >> 5;
+        int i = ((permutation & (1 << 7)) >>> 6) | (permutation & (1 << 4)) >>> 4;
+        int j = ((permutation & (1 << 6)) >>> 5) | (permutation & (1 << 5)) >>> 5;
         substituted |= S0[i][j] << 2;
-        i = ((permutation & (1 << 3)) >> 2) | (permutation & 1);
-        j = ((permutation & (1 << 2)) >> 1) | (permutation & (1 << 1)) >> 1;
+        i = ((permutation & (1 << 3)) >>> 2) | (permutation & 1);
+        j = ((permutation & (1 << 2)) >>> 1) | (permutation & (1 << 1)) >>> 1;
         substituted |= S1[i][j];
 
         // 2 4 3 1
