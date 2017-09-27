@@ -3,6 +3,7 @@ package cryptography;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.nio.charset.CharsetDecoder;
+import java.util.stream.Collectors;
 
 public class SDES {
     private final int KEY_LENGTH = 10;
@@ -20,33 +21,53 @@ public class SDES {
         {2,1,0,3}
     };
 
-    public static byte[] encrypt(byte[] msg, int key){
+    public static String encrypt(String msg, int key)
+    {
         int[] keys = getKeys(key);
-        byte[] result = new byte[msg.length];
+        StringBuilder builder = new StringBuilder(msg.length());
+        for (int i = 0; i < msg.length(); i++) {
+            builder.append((char)encrypt(msg.charAt(i), keys));
+        }
+        return builder.toString();
+    }
+
+    public static String decrypt(String msg, int key)
+    {
+        int[] keys = getKeys(key);
+        StringBuilder builder = new StringBuilder(msg.length());
+        for (int i = 0; i < msg.length(); i++) {
+            builder.append((char)decrypt(msg.charAt(i), keys));
+        }
+        return builder.toString();
+    }
+
+    public static int[] encrypt(int[] msg, int key){
+        int[] keys = getKeys(key);
+        int[] result = new int[msg.length];
         for (int i = 0; i < result.length; i++)
             result[i] = encrypt(msg[i], keys);
 
         return result;
     }
 
-    public static byte[] decrypt(byte[] msg, int key){
+    public static int[] decrypt(int[] msg, int key){
         int[] keys = getKeys(key);
-        byte[] result = new byte[msg.length];
+        int[] result = new int[msg.length];
         for (int i = 0; i < result.length; i++)
             result[i] = decrypt(msg[i], keys);
 
         return result;
     }
 
-    static byte encrypt(byte c, int[] keys)
+    static int encrypt(int c, int[] keys)
     {
         int result = f(IP(c), keys[0]);
         result = (result << 28) >>> 24 | (result >>> 4);
         result = f(result, keys[1]);
-        return (byte) inverseIP(result);
+        return inverseIP(result);
     }
 
-    static byte decrypt(byte c, int[] keys)
+    static int decrypt(int c, int[] keys)
     {
         int[] newKeys = new int[2];
         newKeys[0] = keys[1];
@@ -94,7 +115,7 @@ public class SDES {
     static int permutate(int bits, int... pos) {
         int permutatedBits = 0;
         for(int i = 0; i < pos.length; i++){
-            permutatedBits |= (bits & (1 << pos[i])) >> pos[i] << i;
+            permutatedBits |= (bits & (1 << pos[i])) >>> pos[i] << i;
         }
         return permutatedBits;
     }

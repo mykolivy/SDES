@@ -87,13 +87,20 @@ public class SDESTest {
 
     @Test public void encryptAndDecryptByteSymmetry() {
         int key = 0b1010000010;
-        byte[] msg = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes();
-        assertArrayEquals(msg, SDES.decrypt(SDES.encrypt(msg, key), key));
+        String msg = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        assertEquals(msg, SDES.decrypt(SDES.encrypt(msg, key), key));
     }
 
     @Test public void byteToStringAndReverse() {
         byte[] msg = "abc".getBytes();
         assertArrayEquals("String to byte[] failed", new byte[]{0b1100001, 0b1100010, 'c'}, msg);
         assertEquals("Byte[] to string failed", "abc", new String(msg));
+    }
+
+    @Test public void textTest() {
+        int key = 0b1010000010;
+        String msg = "a";
+        //Integer.toBinaryString(SDES.encrypt("a".getBytes(), 0b1010000010)[0])
+        assertEquals(msg, SDES.decrypt(SDES.encrypt(msg, key), key));
     }
 }

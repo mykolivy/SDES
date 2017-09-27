@@ -5,7 +5,7 @@
  * For more details take a look at the Java Libraries chapter in the Gradle
  * user guide available at https://docs.gradle.org/4.2/userguide/java_library_plugin.html
  */
-version = '0.0.1'
+version = '0.0.2'
 
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'java-library'
