@@ -1,12 +1,6 @@
 package cryptography;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.nio.charset.CharsetDecoder;
-import java.util.stream.Collectors;
-
 public class SDES {
-    private final int KEY_LENGTH = 10;
     private final static int[][] S0 = new int[][] {
         {1,0,3,2},
         {3,2,1,0},
@@ -90,7 +84,7 @@ public class SDES {
     }
 
     static int P8(int key) {
-        return permutate(key, 1, 0, 5, 2, 6, 3, 7, 4);
+        return permutate(key, 1,0,5,2,6,3,7,4);
     }
 
     static int[] getKeys(int key) {
@@ -103,25 +97,21 @@ public class SDES {
     }
 
     static int IP(int plainText) {
-        //2 6 3 1 4 8 5 7
         return permutate(plainText, 1,3,0,4,7,5,2,6);
     }
 
     static int inverseIP(int cryptoText) {
-        //4 1 3 5 7 2 8 6
         return permutate(cryptoText, 2, 0, 6, 1, 3, 5, 7, 4);
     }
 
     static int permutate(int bits, int... pos) {
         int permutatedBits = 0;
-        for(int i = 0; i < pos.length; i++){
-            permutatedBits |= (bits & (1 << pos[i])) >>> pos[i] << i;
-        }
+        for(int i = 0; i < pos.length; i++)
+            permutatedBits |= ((bits >>> pos[i]) & 1) << i;
         return permutatedBits;
     }
 
     static int F(int plainText, int subKey) {
-        //4 1 2 3 2 3 4 1
         int permutation = permutate(plainText, 3,0,1,2,1,2,3,0);
         permutation ^= subKey;
 
@@ -133,7 +123,6 @@ public class SDES {
         j = ((permutation & (1 << 2)) >>> 1) | (permutation & (1 << 1)) >>> 1;
         substituted |= S1[i][j];
 
-        // 2 4 3 1
         return permutate(substituted, 3,1,0,2);
     }
 }
