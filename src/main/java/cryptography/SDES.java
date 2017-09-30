@@ -1,75 +1,85 @@
 package cryptography;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * Implements cryptography.SDES (Simplified Data Encryption Standard) - a symmetric-key encryption algorithm
+ * @author marakaido
+ */
 public class SDES {
-    private final static int[][] S0 = new int[][] {
-        {1,0,3,2},
-        {3,2,1,0},
-        {0,2,1,3},
-        {3,1,3,1}
-    };
-
-    private final static int[][] S1 = new int[][] {
-        {1,1,2,3},
-        {2,0,1,3},
-        {3,0,1,0},
-        {2,1,0,3}
-    };
-
-    public static String encrypt(String msg, int key)
-    {
+    /**
+     * Produces encrypted version of the string
+     * @param msg plain text
+     * @param key encryption key
+     * @return encrypted string
+     */
+    public static String encrypt(String msg, int key) {
         int[] keys = getKeys(key);
         StringBuilder builder = new StringBuilder(msg.length());
-        for (int i = 0; i < msg.length(); i++) {
+        for (int i = 0; i < msg.length(); i++)
             builder.append((char)encrypt(msg.charAt(i), keys));
-        }
+
         return builder.toString();
     }
 
-    public static String decrypt(String msg, int key)
-    {
+    /**
+     * Writes encrypted contents of in to out
+     * @param in source of plain data
+     * @param out destination
+     * @param key encryption key
+     * @throws IOException
+     */
+    public static void encrypt(InputStream in, OutputStream out, int key) throws IOException {
+        int[] keys = getKeys(key);
+        while(in.available() != 0)
+            out.write(encrypt(in.read(), keys));
+    }
+
+    /**
+     * Produces decrypted version of the string
+     * @param msg cypher text
+     * @param key encryption key
+     * @return decrypted string
+     */
+    public static String decrypt(String msg, int key) {
         int[] keys = getKeys(key);
         StringBuilder builder = new StringBuilder(msg.length());
-        for (int i = 0; i < msg.length(); i++) {
+        for (int i = 0; i < msg.length(); i++)
             builder.append((char)decrypt(msg.charAt(i), keys));
-        }
+
         return builder.toString();
     }
 
-    public static int[] encrypt(int[] msg, int key){
+    /**
+     * Writes decrypted contents of in to out
+     * @param in source of encrypted data
+     * @param out destination
+     * @param key encryption key
+     * @throws IOException
+     */
+    public static void decrypt(InputStream in, OutputStream out, int key) throws IOException {
         int[] keys = getKeys(key);
-        int[] result = new int[msg.length];
-        for (int i = 0; i < result.length; i++)
-            result[i] = encrypt(msg[i], keys);
-
-        return result;
+        while(in.available() != 0)
+            out.write(decrypt(in.read(), keys));
     }
 
-    public static int[] decrypt(int[] msg, int key){
-        int[] keys = getKeys(key);
-        int[] result = new int[msg.length];
-        for (int i = 0; i < result.length; i++)
-            result[i] = decrypt(msg[i], keys);
-
-        return result;
-    }
-
-    static int encrypt(int c, int[] keys)
-    {
+    static int encrypt(int c, int[] keys) {
         int result = f(IP(c), keys[0]);
         result = (result << 28) >>> 24 | (result >>> 4);
         result = f(result, keys[1]);
         return inverseIP(result);
     }
 
-    static int decrypt(int c, int[] keys)
-    {
+    static int decrypt(int c, int[] keys) {
         int[] newKeys = new int[2];
         newKeys[0] = keys[1];
         newKeys[1] = keys[0];
         return encrypt(c, newKeys);
     }
 
-    static int f(int plainText, int subKey){
+    static int f(int plainText, int subKey) {
         int L = plainText >>> 4;
         int R = plainText << 28 >>> 28;
         return (L^F(R, subKey)) << 4 | R;
@@ -125,4 +135,18 @@ public class SDES {
 
         return permutate(substituted, 3,1,0,2);
     }
+
+    private final static int[][] S0 = new int[][] {
+            {1,0,3,2},
+            {3,2,1,0},
+            {0,2,1,3},
+            {3,1,3,1}
+    };
+
+    private final static int[][] S1 = new int[][] {
+            {1,1,2,3},
+            {2,0,1,3},
+            {3,0,1,0},
+            {2,1,0,3}
+    };
 }
