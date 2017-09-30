@@ -7,7 +7,7 @@ to DES with much smaller parameters.
 
 ### Installing
 
-You can simply copy-paste SDES implementation to your project from  SDES/src/main/java/cryptography/SDES.java
+You can simply copy-paste SDES implementation to your project from  `SDES/src/main/java/cryptography/SDES.java`
 
 Alternatively, you can build a .jar file and use it as a library:
 1. `cd` into the desired directory and clone the project: `git clone https://github.com/Marakaido/SDES.git`.
@@ -24,7 +24,7 @@ Alternatively, you can build a .jar file and use it as a library:
 int key = 0b0100011011;
 String plainText = "plain text";
 
-// Encript plain text
+// Encrypt plain text
 String cypherText = SDES.encrypt(plainText, key);
 
 // Decrypt cypher text
